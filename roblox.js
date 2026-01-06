@@ -10,6 +10,65 @@ const updateCanvasSize = () => {
 updateCanvasSize();
 const ctx = canvas.getContext('2d');
 
+// Show instructions popup
+const showInstructions = () => {
+    const overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);display:flex;justify-content:center;align-items:center;z-index:1000;';
+
+    const panel = document.createElement('div');
+    panel.style.cssText = 'background:#1a1a1a;border:3px solid #50ff50;border-radius:12px;padding:40px;max-width:600px;font-family:monospace;color:#50ff50;';
+
+    panel.innerHTML = `
+        <h1 style="text-align:center;margin:0 0 30px 0;font-size:36px;color:#50ff50;">🎮 HOW TO PLAY 🎮</h1>
+        
+        <div style="margin-bottom:25px;">
+            <h3 style="margin:0 0 15px 0;color:#fff;font-size:20px;">⌨️ Controls</h3>
+            <div style="margin-left:20px;line-height:1.8;">
+                <p style="margin:5px 0;"><strong style="color:#fff;">W/A/D</strong> - Move forward and turn</p>
+                <p style="margin:5px 0;"><strong style="color:#fff;">SPACE</strong> - Jump</p>
+                <p style="margin:5px 0;"><strong style="color:#fff;">SHIFT</strong> - Duck/Crouch</p>
+                <p style="margin:5px 0;"><strong style="color:#fff;">CLICK / E</strong> - Shoot</p>
+            </div>
+        </div>
+
+        <div style="margin-bottom:25px;">
+            <h3 style="margin:0 0 15px 0;color:#fff;font-size:20px;">🎯 Objectives</h3>
+            <div style="margin-left:20px;line-height:1.8;">
+                <p style="margin:5px 0;"><strong style="color:#f00;">🟥 Red obstacles</strong> - Jump over them</p>
+                <p style="margin:5px 0;"><strong style="color:#f80;">🟧 Orange obstacles</strong> - Jump over them (they move!)</p>
+                <p style="margin:5px 0;"><strong style="color:#00f;">🟦 Blue obstacles</strong> - Duck under them</p>
+                <p style="margin:5px 0;"><strong style="color:#fff;">🎯 Targets</strong> - Shoot them down</p>
+            </div>
+        </div>
+
+        <p style="text-align:center;margin:20px 0;font-size:14px;color:#aaa;">You have 30 seconds to score as many points as possible!</p>
+
+        <div style="text-align:center;margin-top:30px;">
+            <button id="startBtn" style="
+                background:#50ff50;
+                color:#000;
+                border:none;
+                padding:15px 40px;
+                font-size:20px;
+                font-weight:bold;
+                border-radius:8px;
+                cursor:pointer;
+                font-family:monospace;
+            ">START GAME</button>
+        </div>
+    `;
+
+    overlay.appendChild(panel);
+    document.body.appendChild(overlay);
+
+    document.getElementById('startBtn').addEventListener('click', () => {
+        document.body.removeChild(overlay);
+    });
+};
+
+// Show instructions on load
+showInstructions();
+
 // Resize canvas on window resize
 window.addEventListener('resize', updateCanvasSize);
 
@@ -1352,14 +1411,14 @@ const frame = () => {
 
                 // Apply tipping rotation if target is hit
                 if (target.hit && target.tipAngle > 0) {
-                    // Rotate backwards around bottom edge
+                    // Rotate forwards around bottom edge
                     const pivotY = target.y;
                     const relativeY = v.y - pivotY;
                     const relativeZ = v.z - target.z;
 
-                    // Rotate around X axis (tip backwards)
-                    const cosA = Math.cos(-target.tipAngle);
-                    const sinA = Math.sin(-target.tipAngle);
+                    // Rotate around X axis (tip forwards)
+                    const cosA = Math.cos(target.tipAngle);
+                    const sinA = Math.sin(target.tipAngle);
                     v = {
                         x: v.x,
                         y: pivotY + relativeY * cosA - relativeZ * sinA,
