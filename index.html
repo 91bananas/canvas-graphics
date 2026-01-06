@@ -1,0 +1,17 @@
+<canvas id="game"></canvas>
+<div>
+    <button onclick="drawCube()">Draw Cube</button>
+    <button onclick="drawPenguin()">Draw Penguin</button>
+    <button onclick="drawCylinder()">Draw Cylinder</button>
+    <button onclick="drawCone()">Draw Cone</button>
+    <button onclick="drawOctahedron()">Draw Octahedron</button>
+    <button onclick="drawRoblox()">Draw Roblox</button>
+</div>
+<div>
+    <button onclick="toggleFillMode()">Toggle Fill/Wireframe</button>
+</div>
+<div>
+    <label>Vertical Rotation:</label>
+    <input type="range" min="0" max="100" value="0" oninput="updateVerticalAngle(this.value)" style="width: 200px; vertical-align: middle;">
+</div>
+<script type="module" src="index.js"></script>
