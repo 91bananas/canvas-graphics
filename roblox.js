@@ -294,6 +294,7 @@ let collisionFlash = 0; // Timer for collision flash effect
 let successFlash = 0; // Timer for success flash effect
 let obstaclesUnderPlayer = new Set(); // Track obstacles currently beneath player
 let scorePopups = []; // Active score popup animations [{value, x, y, lifetime}]
+let particles = []; // Particle effects [{x, y, vx, vy, lifetime, color, size}]
 let projectiles = []; // Active projectiles [{x, y, z, vx, vy, vz, lifetime}]
 let mouseX = 0; // Mouse X position for aiming
 let mouseY = 0; // Mouse Y position for aiming
@@ -826,6 +827,22 @@ const frame = () => {
                 worldX - characterRadius < obstacleMaxX &&
                 headHeight < obstacle.yMin) {
                 stats.flyingObstaclesDucked++;
+                
+                // Create particle burst for ducking under flying obstacle
+                const particleCount = 20;
+                for (let i = 0; i < particleCount; i++) {
+                    const angle = (Math.PI * 2 * i) / particleCount;
+                    const speed = 200 + Math.random() * 300;
+                    particles.push({
+                        x: canvas.width / 2,
+                        y: canvas.height / 2,
+                        vx: Math.cos(angle) * speed,
+                        vy: Math.sin(angle) * speed,
+                        lifetime: 0.8 + Math.random() * 0.4,
+                        color: `hsl(${180 + Math.random() * 60}, 100%, 60%)`, // Blue-cyan colors
+                        size: 3 + Math.random() * 4
+                    });
+                }
             }
         }
 
@@ -1012,6 +1029,22 @@ const frame = () => {
                     score += bonus;
                     successFlash = 0.3;
 
+                    // Create particle burst
+                    const particleCount = 20 * successfulClears;
+                    for (let i = 0; i < particleCount; i++) {
+                        const angle = (Math.PI * 2 * i) / particleCount;
+                        const speed = 200 + Math.random() * 300;
+                        particles.push({
+                            x: canvas.width / 2,
+                            y: canvas.height / 2,
+                            vx: Math.cos(angle) * speed,
+                            vy: Math.sin(angle) * speed,
+                            lifetime: 0.8 + Math.random() * 0.4,
+                            color: `hsl(${Math.random() * 60 + 80}, 100%, 60%)`,
+                            size: 3 + Math.random() * 4
+                        });
+                    }
+
                     // Add score popup
                     scorePopups.push({
                         value: bonus,
@@ -1056,6 +1089,15 @@ const frame = () => {
         popup.y -= 100 * dt; // Move upward
     });
     scorePopups = scorePopups.filter(popup => popup.lifetime > 0);
+
+    // Update particles
+    particles.forEach(particle => {
+        particle.x += particle.vx * dt;
+        particle.y += particle.vy * dt;
+        particle.vy += 500 * dt; // Gravity
+        particle.lifetime -= dt;
+    });
+    particles = particles.filter(particle => particle.lifetime > 0);
 
     // Update projectiles
     projectiles.forEach(proj => {
@@ -1211,10 +1253,28 @@ const frame = () => {
                     stats.targetsHit++;
                     stats.shotsHit++;
 
+                    // Create particle burst for target hit
+                    const particleCount = 25;
+                    const hitX = canvas.width / 2 + (Math.random() - 0.5) * 100;
+                    const hitY = canvas.height / 2 + (Math.random() - 0.5) * 100;
+                    for (let i = 0; i < particleCount; i++) {
+                        const angle = (Math.PI * 2 * i) / particleCount;
+                        const speed = 150 + Math.random() * 250;
+                        particles.push({
+                            x: hitX,
+                            y: hitY,
+                            vx: Math.cos(angle) * speed,
+                            vy: Math.sin(angle) * speed,
+                            lifetime: 0.6 + Math.random() * 0.4,
+                            color: `hsl(${Math.random() * 30}, 100%, 60%)`,
+                            size: 3 + Math.random() * 5
+                        });
+                    }
+
                     scorePopups.push({
                         value: 100,
-                        x: canvas.width / 2 + (Math.random() - 0.5) * 100,
-                        y: canvas.height / 2 + (Math.random() - 0.5) * 100,
+                        x: hitX,
+                        y: hitY,
                         lifetime: 1.0
                     });
                 }
@@ -1631,6 +1691,18 @@ const frame = () => {
         const timeLeft = Math.max(0, GAME_DURATION - gameTimer);
         ctx.fillText(`Time: ${timeLeft.toFixed(1)}s`, 20, 110);
     }
+
+    // Draw particles
+    particles.forEach(particle => {
+        const alpha = particle.lifetime / 1.2; // Fade out
+        ctx.save();
+        ctx.globalAlpha = alpha;
+        ctx.fillStyle = particle.color;
+        ctx.beginPath();
+        ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+    });
 
     // Draw score popups
     scorePopups.forEach(popup => {
