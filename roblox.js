@@ -63,11 +63,21 @@ const showInstructions = () => {
 
     document.getElementById('startBtn').addEventListener('click', () => {
         document.body.removeChild(overlay);
+        localStorage.setItem('gameInstructionsSeen', 'true');
     });
 };
 
-// Show instructions on load
-showInstructions();
+// Show instructions on load only if not seen before
+if (!localStorage.getItem('gameInstructionsSeen')) {
+    showInstructions();
+}
+
+// Create "How to Play" button
+const howToPlayBtn = document.createElement('button');
+howToPlayBtn.textContent = '❓ How to Play';
+howToPlayBtn.style.cssText = 'position:fixed;top:20px;right:20px;background:#50ff50;color:#000;border:none;padding:10px 20px;font-size:14px;font-weight:bold;border-radius:8px;cursor:pointer;font-family:monospace;z-index:100;';
+howToPlayBtn.addEventListener('click', showInstructions);
+document.body.appendChild(howToPlayBtn);
 
 // Resize canvas on window resize
 window.addEventListener('resize', updateCanvasSize);
@@ -354,7 +364,7 @@ const generateTrackSection = (startZ, endZ) => {
                 height: 0.3,
                 isStationary: true,
                 tracked: false,
-                color: '#f00', // Red
+                color: 'rgba(255, 0, 0, 0.25)', // Red with transparency
                 id: nextObstacleId++
             });
         } else if (Math.random() > 0.7) {
@@ -393,7 +403,7 @@ const generateTrackSection = (startZ, endZ) => {
                 yMin: 0.55, // Higher up - above jump height
                 yMax: 0.75,  // Higher up
                 tracked: false,
-                color: '#00f' // Blue
+                color: 'rgba(0, 0, 255, 0.25)' // Blue with transparency
             });
         }
 
@@ -453,6 +463,11 @@ canvas.addEventListener('click', () => {
         shootProjectile();
         lastShot = 0;
     }
+});
+
+// Prevent context menu on canvas
+canvas.addEventListener('contextmenu', (e) => {
+    e.preventDefault();
 });
 
 // Shoot projectile with 'e' key
@@ -1324,7 +1339,7 @@ const frame = () => {
                 facesWithDepth.push({
                     points: transformedPoints,
                     avgZ: avgZ - 0.2,
-                    color: '#f80' // Orange for moving walls
+                    color: 'rgba(255, 136, 0, 0.25)' // Orange with transparency
                 });
             }
         });
